@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrightSteps — ก้าวเล็ก ๆ เรียนรู้ทุกวัน</title>
-    <!-- นำเข้าฟอนต์น่ารักๆ เหมาะสำหรับเด็ก และไอคอนสวยๆ -->
     <link href="https://googleapis.com" rel="stylesheet">
     <link rel="stylesheet" href="https://cloudflare.com">
     
@@ -12,7 +11,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Mitr', sans-serif;
-            background-color: #E0F7FA; /* สีฟ้าพาสเทลสดใสสำหรับเด็ก */
+            background-color: #E0F7FA;
             color: #004D40;
             display: flex;
             flex-direction: column;
@@ -31,30 +30,56 @@
             border: 5px solid #80DEEA;
             margin-top: 10px;
         }
-        .header-icon {
-            font-size: 50px;
-            color: #FFB300;
-            margin-bottom: 10px;
-        }
+        .header-icon { font-size: 50px; color: #FFB300; margin-bottom: 10px; }
         h1 { font-family: 'Fredoka One', 'Mitr', sans-serif; font-size: 32px; color: #00796B; }
         .subtitle { font-size: 14px; color: #009688; margin-bottom: 25px; }
         
-        /* โซนแสดงคะแนนสะสม */
-        .score-board {
-            background-color: #FFF9C4;
-            padding: 10px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
+        .status-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 20px;
-            border: 2px dashed #FBC02D;
+        }
+        .score-board, .timer-board {
+            padding: 12px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            border: 2px dashed;
+        }
+        .score-board { background-color: #FFF9C4; border-color: #FBC02D; }
+        .timer-board { background-color: #FFEBEE; border-color: #FF8A80; color: #C62828; }
+        .timer-danger { background-color: #FFCDD2 !important; animation: blink 0.5s infinite; }
+
+        .mode-selection {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            padding: 10px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 3px solid #E0E0E0;
+            border-radius: 12px;
+            background-color: #F5F5F5;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background-color: #009688;
+            color: white;
+            border-color: #00796B;
+            box-shadow: 0 4px 0 #004D40;
+            transform: translateY(-2px);
         }
 
-        /* โซนกล่องคำถามเกม */
         .game-box {
             background-color: #F5F5F5;
             padding: 20px;
@@ -63,13 +88,12 @@
             border: 3px solid #E0E0E0;
         }
         .question-text {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             margin-bottom: 20px;
             color: #333;
         }
         
-        /* ปุ่มตัวเลือกคำตอบ (ช้อยส์) */
         .choice-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -80,19 +104,15 @@
             color: white;
             border: none;
             padding: 15px;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             border-radius: 15px;
             cursor: pointer;
             box-shadow: 0 5px 0 #1565C0;
             transition: all 0.1s;
         }
-        .choice-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #1565C0;
-        }
+        .choice-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1565C0; }
         
-        /* ปุ่มโซนสร้างรายได้ (ขายใบงาน PDF) */
         .shop-banner {
             background-color: #FF9100;
             color: white;
@@ -111,29 +131,38 @@
             border: none;
             width: 100%;
         }
-        .shop-banner:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #EF6C00;
-        }
+        .shop-banner:active { transform: translateY(4px); box-shadow: 0 1px 0 #EF6C00; }
+
+        @keyframes blink { 50% { opacity: 0.7; } }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- ส่วนหัวข้อแอป -->
-        <div class="header-icon"><i class="fa-solid fa-star-twinkle"></i>🌟</div>
+        <div class="header-icon">🌟</div>
         <h1>BrightSteps</h1>
-        <div class="subtitle">ก้าวเล็ก ๆ เรียนรู้ทุกวัน 🚀</div>
+        <div class="subtitle">เป้าหมายชนะ: 150 คะแนน 🏆</div>
 
-        <!-- กระดานคะแนนสำหรับเด็ก -->
-        <div class="score-board">
-            <i class="fa-solid fa-trophy" style="color: #FBC02D;"></i>
-            <span>คะแนนของหนู: <span id="score-text">0</span> คะแนน</span>
+        <div class="status-bar">
+            <div class="score-board">
+                <i class="fa-solid fa-trophy" style="color: #FBC02D;"></i>
+                <span>ดาวของหนู: <span id="score-text">0</span> / 150</span>
+            </div>
+            <div class="timer-board" id="timer-box">
+                <i class="fa-solid fa-clock"></i>
+                <span>เวลา: <span id="time-left">10.0</span> วิ</span>
+            </div>
         </div>
 
-        <!-- กล่องเกมคณิตศาสตร์ ป.1-3 -->
+        <div class="mode-selection">
+            <button class="mode-btn active" id="btn-add" onclick="changeMode('add')">➕ บวก</button>
+            <button class="mode-btn" id="btn-sub" onclick="changeMode('sub')">➖ ลบ</button>
+            <button class="mode-btn" id="btn-mul" onclick="changeMode('mul')">✖️ คูณ</button>
+            <button class="mode-btn" id="btn-div" onclick="changeMode('div')">➗ หาร</button>
+        </div>
+
         <div class="game-box">
-            <div class="question-text" id="question-display">กำลังโหลดโจทย์แสนสนุก...</div>
+            <div class="question-text" id="question-display">กำลังเตรียมด่านสปีดรัน...</div>
             <div class="choice-grid">
                 <button class="choice-btn" onclick="checkAnswer(0)" id="c0">?</button>
                 <button class="choice-btn" onclick="checkAnswer(1)" id="c1">?</button>
@@ -142,69 +171,87 @@
             </div>
         </div>
 
-        <!-- ปุ่มสำหรับขายใบงานสร้างรายได้ตามแผนธุรกิจ -->
         <button class="shop-banner" onclick="openShop()">
-            <i class="fa-solid fa-file-pdf"></i> ดาวน์โหลดใบงานฝึกฝนต่อ (เริ่มต้น 99 บาท)
+            <i class="fa-solid fa-file-pdf"></i> ดาวน์โหลดชุดใบงานสปีดรันฝึกฝน (เริ่มต้น 39 บาท)
         </button>
     </div>
 
-    <!-- ส่วนตรรกะ AI และการควบคุมเกม (JavaScript) -->
     <script>
         let score = 0;
         let currentCorrectAnswer = 0;
+        let timeLeft = 10;
+        let maxTimeForQuestion = 10; // เวลาตั้งต้นเต็มข้อ (จะค่อยๆ ลดลงเมื่อคะแนนเพิ่มขึ้น)
+        let timerInterval;
+        let currentMode = 'add';
 
-        // ฟังก์ชันสุ่มโจทย์คณิตศาสตร์ ป.1-ป.2 แบบอัตโนมัติไม่รู้จบ
-        function generateQuestion() {
-            // สุ่มตัวเลขสองตัวมาบวกกัน (เหมาะสำหรับระดับเริ่มต้น)
-            let num1 = Math.floor(Math.random() * 15) + 1; 
-            let num2 = Math.floor(Math.random() * 15) + 1;
-            let correctAnswer = num1 + num2;
-            currentCorrectAnswer = correctAnswer;
+        function startTimer() {
+            clearInterval(timerInterval);
+            
+            // 🆕 คำนวณเวลาเริ่มต้นของข้อนี้ให้เร็วขึ้นตามคะแนน (ทุกๆ 10 คะแนน เวลาจะลดลง 0.5 วินาที)
+            // ตัวอย่าง: คะแนน 0 = ให้เวลา 10 วิ, คะแนน 100 = จะเหลือเวลาให้คิดแค่ 5 วิ!
+            maxTimeForQuestion = 10 - (score / 20); 
+            if (maxTimeForQuestion < 2.5) maxTimeForQuestion = 2.5; // ล็อกไม่ให้เร็วจนเกินมนุษย์ (ขั้นต่ำเหลือข้อละ 2.5 วิ)
+            
+            timeLeft = maxTimeForQuestion;
+            document.getElementById('time-left').innerText = timeLeft.toFixed(1);
+            document.getElementById('timer-box').classList.remove('timer-danger');
 
-            // แสดงโจทย์บนหน้าจอ
-            document.getElementById('question-display').innerText = `${num1} + ${num2} = เท่ากับเท่าไหร่นะ?`;
+            // ใช้การนับถอยหลังละเอียดขึ้นทีละ 0.1 วินาที เพื่อความสมูทและตื่นเต้น
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                if (timeLeft < 0) timeLeft = 0;
+                
+                document.getElementById('time-left').innerText = timeLeft.toFixed(1);
 
-            // สร้างช้อยส์หลอก 3 ตัว + ช้อยส์ถูก 1 ตัว
-            let choices = [correctAnswer];
-            while(choices.length < 4) {
-                let wrongAnswer = correctAnswer + (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                if(wrongAnswer > 0 && !choices.includes(wrongAnswer)) {
-                    choices.push(wrongAnswer);
+                if (timeLeft <= 3.0) {
+                    document.getElementById('timer-box').classList.add('timer-danger');
                 }
-            }
 
-            // สลับตำแหน่งช้อยส์ไม่ให้คำตอบถูกอยู่ที่เดิม
-            choices.sort(() => Math.random() - 0.5);
-
-            // นำคำตอบไปใส่ในปุ่มกดทั้ง 4 ปุ่ม
-            for(let i = 0; i < 4; i++) {
-                document.getElementById(`c${i}`).innerText = choices[i];
-            }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ แสงเธอเร็วได้กว่านี้ ไอ่ตูด");
+                    generateQuestion();
+                }
+            }, 100);
         }
 
-        // ฟังก์ชันตรวจคำตอบเมื่อเด็กกดปุ่มช้อยส์
-        function checkAnswer(buttonIndex) {
-            let selectedAnswer = parseInt(document.getElementById(`c${buttonIndex}`).innerText);
-            
-            if(selectedAnswer === currentCorrectAnswer) {
-                alert("🎉 เก่งมากเลยครับ! ตอบถูกรับไป 10 คะแนน 🌟");
-                score += 10;
-                document.getElementById('score-text').innerText = score;
-            } else {
-                alert("😢 ลองใหม่อีกทีนะคนเก่ง! คำตอบที่ถูกคือ " + currentCorrectAnswer);
-            }
-            
-            // สุ่มโจทย์ข้อถัดไปทันที
+        function changeMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            if(mode === 'add') document.getElementById('btn-add').classList.add('active');
+            if(mode === 'sub') document.getElementById('btn-sub').classList.add('active');
+            if(mode === 'mul') document.getElementById('btn-mul').classList.add('active');
+            if(mode === 'div') document.getElementById('btn-div').classList.add('active');
             generateQuestion();
         }
 
-        // ฟังก์ชันแสดงกล่องขายสินค้า (Monetization)
-        function openShop() {
-            alert("📚 ระบบร้านค้า BrightSteps\n\n• แพ็กเกจใบงานฝึกฝน ป.1 - ป.3 ราคา 99 บาท\n• แพ็กเกจสื่อการสอนสำหรับคุณครู ราคา 299 บาท\n\n(ต้นแบบตัวอย่าง: ในอนาคตจุดนี้จะลิงก์ไปยังหน้าร้านค้าหรือช่องทางชำระเงินของคุณครับ)");
-        }
+        function generateQuestion() {
+            let num1, num2, correctAnswer, questionSign;
 
-        // เริ่มเกมทันทีที่เปิดหน้าเว็บ
-        generateQuestion();
-    </script>
-</body>
-</html>
+            if (currentMode === 'add') {
+                num1 = Math.floor(Math.random() * 15) + 1; 
+                num2 = Math.floor(Math.random() * 15) + 1;
+                correctAnswer = num1 + num2;
+                questionSign = '+';
+            } else if (currentMode === 'sub') {
+                num1 = Math.floor(Math.random() * 15) + 5; 
+                num2 = Math.floor(Math.random() * num1);
+                correctAnswer = num1 - num2;
+                questionSign = '-';
+            } else if (currentMode === 'mul') {
+                num1 = Math.floor(Math.random() * 8) + 2; 
+                num2 = Math.floor(Math.random() * 9) + 1;
+                correctAnswer = num1 * num2;
+                questionSign = '×';
+            } else if (currentMode === 'div') {
+                num2 = Math.floor(Math.random() * 5) + 2; 
+                correctAnswer = Math.floor(Math.random() * 5) + 1; 
+                num1 = num2 * correctAnswer; 
+                questionSign = '÷';
+            }
+
+            currentCorrectAnswer = correctAnswer;
+            document.getElementById('question-display').innerText = `${num1} ${questionSign} ${num2} = เท่าไหร่นะ?`;
+
+            let choices = [correctAnswer];
+            while(choices.length < 4) {
