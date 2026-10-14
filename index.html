@@ -172,7 +172,7 @@
     <div id="custom-alert" class="custom-alert-overlay">
         <div class="custom-alert-box">
             <div class="alert-title" id="alert-msg">ข้อความแจ้งเตือน</div>
-            <button class="alert-btn" onclick="closeCustomAlert()">ลุยต่อเลย! 🚀</button>
+            <button class="alert-btn" id="alert-confirm-btn">ลุยต่อเลย! 🚀</button>
         </div>
     </div>
 
@@ -193,83 +193,83 @@
         </div>
 
         <div class="mode-selection">
-            <button class="mode-btn active" id="btn-add" onclick="changeMode('add')">➕ บวก</button>
-            <button class="mode-btn" id="btn-sub" onclick="changeMode('sub')">➖ ลบ</button>
-            <button class="mode-btn" id="btn-mul" onclick="changeMode('mul')">✖️ คูณ</button>
-            <button class="mode-btn" id="btn-div" onclick="changeMode('div')">➗ หาร</button>
+            <button class="mode-btn active" id="btn-add">➕ บวก</button>
+            <button class="mode-btn" id="btn-sub">➖ ลบ</button>
+            <button class="mode-btn" id="btn-mul">✖️ คูณ</button>
+            <button class="mode-btn" id="btn-div">➗ หาร</button>
         </div>
 
         <div class="game-box">
             <div class="question-text" id="question-display">กำลังเตรียมด่าน...</div>
             <div class="choice-grid">
-                <button class="choice-btn" onclick="checkAnswer(0)" id="c0">?</button>
-                <button class="choice-btn" onclick="checkAnswer(1)" id="c1">?</button>
-                <button class="choice-btn" onclick="checkAnswer(2)" id="c2">?</button>
-                <button class="choice-btn" onclick="checkAnswer(3)" id="c3">?</button>
+                <button class="choice-btn" id="c0">?</button>
+                <button class="choice-btn" id="c1">?</button>
+                <button class="choice-btn" id="c2">?</button>
+                <button class="choice-btn" id="c3">?</button>
             </div>
         </div>
 
-        <button class="shop-banner" onclick="showShopInfo()">
+        <button class="shop-banner" id="shop-btn">
             <i class="fa-solid fa-file-pdf"></i> ดาวน์โหลดชุดใบงานสปีดรันฝึกฝน (เริ่มต้น 39 บาท)
         </button>
     </div>
 
     <script>
-        let score = 0;
-        let currentCorrectAnswer = 0;
-        let timeLeft = 10;
-        let maxTimeForQuestion = 10; 
-        let timerInterval;
-        let currentMode = 'add';
-        let isAlertOpen = false;
+        // บังคับให้สคริปต์รันหลังจากปุ่มบนหน้าจอวาดเสร็จสมบูรณ์ 100% ป้องกันอาการค้าง
+        document.addEventListener("DOMContentLoaded", function() {
+            let score = 0;
+            let currentCorrectAnswer = 0;
+            let timeLeft = 10;
+            let maxTimeForQuestion = 10; 
+            let timerInterval;
+            let currentMode = 'add';
+            let isAlertOpen = false;
 
-        function startTimer() {
-            clearInterval(timerInterval);
-            if (isAlertOpen) return;
-
-            maxTimeForQuestion = 10 - (score / 20); 
-            if (maxTimeForQuestion < 2.5) maxTimeForQuestion = 2.5; 
-            
-            timeLeft = maxTimeForQuestion;
-            document.getElementById('time-left').innerText = timeLeft.toFixed(1);
-            document.getElementById('timer-box').classList.remove('timer-danger');
-
-            timerInterval = setInterval(() => {
+            function startTimer() {
+                clearInterval(timerInterval);
                 if (isAlertOpen) return;
-                timeLeft -= 0.1;
-                if (timeLeft < 0) timeLeft = 0;
+
+                maxTimeForQuestion = 10 - (score / 20); 
+                if (maxTimeForQuestion < 2.5) maxTimeForQuestion = 2.5; 
                 
+                timeLeft = maxTimeForQuestion;
                 document.getElementById('time-left').innerText = timeLeft.toFixed(1);
+                document.getElementById('timer-box').classList.remove('timer-danger');
 
-                if (timeLeft <= 3.0) {
-                    document.getElementById('timer-box').classList.add('timer-danger');
-                }
+                timerInterval = setInterval(() => {
+                    if (isAlertOpen) return;
+                    timeLeft -= 0.1;
+                    if (timeLeft < 0) timeLeft = 0;
+                    
+                    document.getElementById('time-left').innerText = timeLeft.toFixed(1);
 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    showCustomAlert("⏰ แสงเธอเร็วได้กว่านี้ ไอ่ตูด");
-                }
-            }, 100);
-        }
+                    if (timeLeft <= 3.0) {
+                        document.getElementById('timer-box').classList.add('timer-danger');
+                    }
 
-        function showCustomAlert(msg) {
-            isAlertOpen = true;
-            clearInterval(timerInterval);
-            document.getElementById('alert-msg').innerText = msg;
-            document.getElementById('custom-alert').style.display = 'flex';
-        }
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        showCustomAlert("⏰ แสนเธอเร็วได้กว่านี้ ไอ่ตูด");
+                    }
+                }, 100);
+            }
 
-        function closeCustomAlert() {
-            document.getElementById('custom-alert').style.display = 'none';
-            isAlertOpen = false;
-            generateQuestion();
-        }
+            function showCustomAlert(msg) {
+                isAlertOpen = true;
+                clearInterval(timerInterval);
+                document.getElementById('alert-msg').innerText = msg;
+                document.getElementById('custom-alert').style.display = 'flex';
+            }
 
-        function showShopInfo() {
-            showCustomAlert("📚 คลังสื่อการสอน BrightSteps พรีเมียม PDF\n\n• ชุดใบงานแบบรวมวิชาจับเวลา 39 บาท\n• แพ็กเกจใบงานสำหรับคุณครู 299 บาท");
-        }
+            window.closeCustomAlert = function() {
+                document.getElementById('custom-alert').style.display = 'none';
+                isAlertOpen = false;
+                generateQuestion();
+            }
 
-        function changeMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            if(mode === 'add') document.getElementById('btn-add').classList.add('active');
+            window.showShopInfo = function() {
+                showCustomAlert("📚 คลังสื่อการสอน BrightSteps พรีเมียม PDF\n\n• ชุดใบงานแบบรวมวิชาจับเวลา 39 บาท\n• แพ็กเกจใบงานสำหรับคุณครู 299 บาท");
+            }
+
+            window.changeMode = function(mode) {
+                currentMode = mode;
